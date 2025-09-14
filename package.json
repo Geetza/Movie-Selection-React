@@ -1,0 +1,21 @@
+{
+  "name": "Filmster2",
+  "version": "0.1.0",
+  "description": "",
+  "license": "MIT",
+  "scripts": {
+    "start": "vite",
+    "preview": "vite preview",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-hook-form": "^7.62.0",
+    "react-router-dom": "^7.9.1",
+    "sass": "^1.92.1"
+  },
+  "devDependencies": {
+    "vite": "^6.2.0"
+  }
+}
