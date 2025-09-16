@@ -11,16 +11,15 @@ const MovieForm = ({ onAddMovie, onUpdateMovie, defaultValues, onCancel }) => {
   } = useForm({ defaultValues });
 
   useEffect(() => {
+    console.log("MovieForm mountovan");
     if (!defaultValues) {
       reset({
-        naziv: "",
-        sala: "",
-        cena: "",
-        slika: "",
-        ocene: {
-          like: Math.floor(Math.random() * 5) + 1,
-          dislike: Math.floor(Math.random() * 5) + 1,
-        },
+        name: "",
+        hall: "",
+        price: "",
+        poster: "",
+        likes: Math.floor(Math.random() * 5) + 1,
+        dislikes: Math.floor(Math.random() * 5) + 1,
       });
     } else {
       reset(defaultValues);
@@ -33,12 +32,13 @@ const MovieForm = ({ onAddMovie, onUpdateMovie, defaultValues, onCancel }) => {
 
   const onSubmit = (data) => {
     const newMovie = {
-      id: defaultValues?.id || Date.now(),
-      naziv: data.naziv,
-      sala: Number(data.sala),
-      cena: Number(data.cena),
-      slika: data.slika,
-      ocene: defaultValues?.ocene || { like: 0, dislike: 0 },
+      id: defaultValues?.id,
+      name: data.name,
+      hall: Number(data.hall),
+      price: Number(data.price),
+      poster: data.poster,
+      likes: data.likes || 0,
+      dislikes: data.dislikes || 0,
     };
 
     if (defaultValues) {
@@ -59,38 +59,38 @@ const MovieForm = ({ onAddMovie, onUpdateMovie, defaultValues, onCancel }) => {
             Naziv:{" "}
             <input
               type="text"
-              {...register("naziv", { required: "Naziv filma morate uneti" })}
+              {...register("name", { required: "Naziv filma morate uneti" })}
             />
           </label>
-          {errors.naziv && (
-            <span className="error">{errors.naziv.message}</span>
-          )}
+          {errors.name && <span className="error">{errors.name.message}</span>}
 
           <label>
             Sala:{" "}
             <input
               type="number"
-              {...register("sala", {
+              {...register("hall", {
                 required: "Salu za film morate uneti",
                 min: { value: 1, message: "Najmanji broj za salu je 1" },
                 max: { value: 12, message: "Najveci broj za salu je 12" },
               })}
             />
           </label>
-          {errors.sala && <span className="error">{errors.sala.message}</span>}
+          {errors.hall && <span className="error">{errors.hall.message}</span>}
 
           <label>
-            Slika: <input type="text" {...register("slika")} />
+            Slika: <input type="text" {...register("poster")} />
           </label>
 
           <label>
             Cena:{" "}
             <input
               type="number"
-              {...register("cena", { required: "Cenu za film morate uneti" })}
+              {...register("price", { required: "Cenu za film morate uneti" })}
             />
           </label>
-          {errors.cena && <span className="error">{errors.cena.message}</span>}
+          {errors.price && (
+            <span className="error">{errors.price.message}</span>
+          )}
 
           <div className="submit-btn-container">
             <button type="submit" className="submit-btn">

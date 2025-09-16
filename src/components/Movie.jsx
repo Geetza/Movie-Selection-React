@@ -4,16 +4,16 @@ const Movie = ({ movie, onLike, onDislike, onEdit }) => {
   return (
     <li className="movie-item">
       <div className="movie-container">
-        <img className="movie-img" src={movie.slika} alt={movie.naziv} />
+        <img className="movie-img" src={movie.poster} alt={movie.name} />
 
         <div className="movie-info">
-          <p>{movie.naziv}</p>
-          <p>Sala broj: {movie.sala}</p>
-          <p>Cena: {movie.cena} RSD</p>
+          <p>{movie.name}</p>
+          <p>Sala broj: {movie.hall}</p>
+          <p>Cena: {movie.price} RSD</p>
 
           <div className="movie-btn-container">
-            <button onClick={onLike}>Like({movie.ocene.like})</button>
-            <button onClick={onDislike}>Dislike({movie.ocene.dislike})</button>
+            <button onClick={onLike}>Like({movie.likes})</button>
+            <button onClick={onDislike}>Dislike({movie.dislikes})</button>
             <button onClick={onEdit}>Edit</button>
           </div>
         </div>

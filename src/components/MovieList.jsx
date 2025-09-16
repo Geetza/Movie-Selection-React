@@ -1,96 +1,56 @@
 import React, { useEffect, useState } from "react";
 import Movie from "./Movie";
 import MovieForm from "./MovieForm";
+import {
+  getAllMovies,
+  createMovie,
+  updateMovie,
+} from "../services/movieService.js";
 
 const MovieList = () => {
-  const [movies, setMovies] = useState([
-    {
-      id: 1,
-      naziv: "Captain America - The first avenger",
-      sala: 2,
-      cena: 350,
-      slika:
-        "https://m.media-amazon.com/images/I/51Xp+8qDCbL._AC_UF350,350_QL50_.jpg",
-      ocene: { like: 0, dislike: 0 },
-    },
-    {
-      id: 2,
-      naziv: "The papillon",
-      sala: 1,
-      cena: 300,
-      slika:
-        "https://m.media-amazon.com/images/M/MV5BMjIxMTMyOTE2NF5BMl5BanBnXkFtZTgwMDYyNzY1NTM@._V1_.jpg",
-      ocene: { like: 0, dislike: 0 },
-    },
-    {
-      id: 3,
-      naziv: "The lost city of Z",
-      sala: 5,
-      cena: 350,
-      slika:
-        "https://m.media-amazon.com/images/M/MV5BZmU2ODIyMWItMjU3Zi00ZmVhLWIyNDAtMWE5OWU2ZDExMGFiXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
-      ocene: { like: 0, dislike: 0 },
-    },
-    {
-      id: 4,
-      naziv: "Snatch",
-      sala: 4,
-      cena: 350,
-      slika:
-        "https://m.media-amazon.com/images/M/MV5BYzk5NjJkMTQtN2IyNC00YWM5LTlhZmMtNGI3MWNhMTU1YTc4XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
-      ocene: { like: 0, dislike: 0 },
-    },
-  ]);
+  const [movies, setMovies] = useState([]);
   const [editingMovie, setEditingMovie] = useState(null);
   const [showMovieForm, setShowMovieForm] = useState(false);
   const [bestRatedMovie, setBestRatedMovie] = useState(null);
+  const [error, setError] = useState("");
 
-  const randomNumber = () => Math.floor(Math.random() * 5) + 1;
   const danasnjiDan = new Date().toLocaleDateString("sr-RS");
 
-  useEffect(() => {
-    console.log("Postavka filmova");
-  }, []);
-
-  useEffect(() => {
-    const bestMovie = movies.reduce((max, current) => {
-      const score = current.ocene.like - current.ocene.dislike;
-      const maxScore = max.ocene.like - max.ocene.dislike;
+  const getBestRatedMovie = (moviesList) => {
+    if (moviesList.length === 0) return null;
+    return moviesList.reduce((max, current) => {
+      const score = current.likes - current.dislikes;
+      const maxScore = max.likes - max.dislikes;
       return score > maxScore ? current : max;
-    });
+    }, moviesList[0]);
+  };
 
-    setBestRatedMovie(bestMovie);
-  }, [movies]);
+  const loadMovies = async () => {
+    try {
+      const data = await getAllMovies();
+      setMovies(data);
+      setError("");
+    } catch (err) {
+      setError("Greska pri učitavanju filmova");
+    }
+  };
 
-  useEffect(() => {
-    return () => {
-      console.log("Sklanjanje filmova");
-    };
-  }, []);
-
-  const handleVote = (id, tipOcene) => {
+  const handleVote = (id, voteType) => {
     setMovies((prev) =>
       prev.map((movie) =>
-        movie.id === id
-          ? {
-              ...movie,
-              ocene: { ...movie.ocene, [tipOcene]: movie.ocene[tipOcene] + 1 },
-            }
-          : movie
+        movie.id === id ? { ...movie, [voteType]: movie[voteType] + 1 } : movie
       )
     );
   };
 
-  const handleAddMovie = (newMovie) => {
-    setMovies((prevMovies) => [
-      ...prevMovies,
-      {
-        ...newMovie,
-        id: Date.now(),
-        ocene: { like: randomNumber(), dislike: randomNumber() },
-      },
-    ]);
-    setShowMovieForm(false);
+  const handleAddMovie = async (newMovie) => {
+    try {
+      const savedMovie = await createMovie(newMovie);
+      setMovies((prevMovies) => [...prevMovies, savedMovie]);
+      setShowMovieForm(false);
+    } catch (err) {
+      setError("Greska pri dodavanju filma");
+    }
   };
 
   const handleEditMovie = (movie) => {
@@ -101,19 +61,40 @@ const MovieList = () => {
     }
   };
 
-  const handleUpdateMovie = (updatedMovie) => {
-    setMovies((prev) =>
-      prev.map((oldMovie) =>
-        oldMovie.id === updatedMovie.id ? updatedMovie : oldMovie
-      )
-    );
-    setEditingMovie(null);
+  const handleUpdateMovie = async (movieToUpdate) => {
+    try {
+      const savedMovie = await updateMovie(movieToUpdate);
+      setMovies((prevMovies) =>
+        prevMovies.map((m) => (m.id === savedMovie.id ? savedMovie : m))
+      );
+      setEditingMovie(null);
+    } catch {
+      setError("Greska pri izmeni filma");
+    }
   };
+
+  useEffect(() => {
+    console.log("Postavka filmova");
+    loadMovies();
+  }, []);
+
+  useEffect(() => {
+    const bestMovie = getBestRatedMovie(movies);
+    setBestRatedMovie(bestMovie);
+  }, [movies]);
+
+  useEffect(() => {
+    return () => {
+      console.log("Sklanjanje filmova");
+    };
+  }, []);
 
   return (
     <div>
       <div className="movieList-header">
         <h1 className="movieList-title">Repertoar za danas ({danasnjiDan})</h1>
+
+        {error && <p style={{ color: "red" }}>{error}</p>}
 
         <button
           className="add-movie-btn"
@@ -143,15 +124,15 @@ const MovieList = () => {
           <h2>⭐ Najbolje ocenjen film ⭐</h2>
           <img
             className="movie-img"
-            src={bestRatedMovie.slika}
-            alt={bestRatedMovie.naziv}
+            src={bestRatedMovie.poster}
+            alt={bestRatedMovie.name}
           />
           <div className="best-movie-info">
-            <p>{bestRatedMovie.naziv}</p>
-            <p>Sala broj: {bestRatedMovie.sala}</p>
-            <p>Cena: {bestRatedMovie.cena} RSD</p>
+            <p>{bestRatedMovie.name}</p>
+            <p>Sala broj: {bestRatedMovie.hall}</p>
+            <p>Cena: {bestRatedMovie.price} RSD</p>
             <p>
-              👍{bestRatedMovie.ocene.like} 👎{bestRatedMovie.ocene.dislike}
+              👍{bestRatedMovie.likes} 👎{bestRatedMovie.dislikes}
             </p>
           </div>
         </div>
@@ -163,8 +144,8 @@ const MovieList = () => {
             <Movie
               key={movie.id}
               movie={movie}
-              onLike={() => handleVote(movie.id, "like")}
-              onDislike={() => handleVote(movie.id, "dislike")}
+              onLike={() => handleVote(movie.id, "likes")}
+              onDislike={() => handleVote(movie.id, "dislikes")}
               onEdit={() => handleEditMovie(movie)}
               isEditing={editingMovie && editingMovie.id === movie.id}
             />
