@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Movie from "./Movie";
 import Spinner from "./Spinner.jsx";
-import { getAllMovies } from "../services/movieService.js";
+import { deleteMovie, getAllMovies } from "../services/movieService.js";
 import { Link } from "react-router-dom";
 
 const MovieList = () => {
@@ -30,6 +30,15 @@ const MovieList = () => {
       setError("Greska pri učitavanju filmova");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await deleteMovie(id);
+      setMovies(movies.filter((movie) => movie.id !== id));
+    } catch (error) {
+      setError("Brisanje nije uspelo");
     }
   };
 
@@ -92,6 +101,7 @@ const MovieList = () => {
               onLike={() => handleVote(movie.id, "likes")}
               onDislike={() => handleVote(movie.id, "dislikes")}
               editLink={`/movies/edit/${movie.id}`}
+              onDelete={() => handleDelete(movie.id)}
             />
           ))}
         </ul>

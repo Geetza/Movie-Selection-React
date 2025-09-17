@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-const Movie = ({ movie, onLike, onDislike, editLink }) => {
+const Movie = ({ movie, onLike, onDislike, editLink, onDelete }) => {
   return (
     <li className="movie-item">
       <div className="movie-container">
@@ -18,6 +18,7 @@ const Movie = ({ movie, onLike, onDislike, editLink }) => {
             <Link to={editLink} className="edit-btn">
               Edit
             </Link>
+            <button onClick={onDelete}>Delete</button>
           </div>
         </div>
       </div>
