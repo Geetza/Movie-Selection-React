@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from "react";
 import Movie from "./Movie";
 import Spinner from "./Spinner.jsx";
-import { deleteMovie, getAllMovies } from "../services/movieService.js";
-import { Link } from "react-router-dom";
+import {
+  deleteMovie,
+  getAllMovies,
+  likeMovie,
+  dislikeMovie,
+} from "../services/movieService.js";
 
 const MovieList = () => {
   const [movies, setMovies] = useState([]);
@@ -26,7 +30,7 @@ const MovieList = () => {
       const data = await getAllMovies();
       setMovies(data);
       setError("");
-    } catch (err) {
+    } catch (error) {
       setError("Greska pri učitavanju filmova");
     } finally {
       setLoading(false);
@@ -42,12 +46,26 @@ const MovieList = () => {
     }
   };
 
-  const handleVote = (id, voteType) => {
-    setMovies((prev) =>
-      prev.map((movie) =>
-        movie.id === id ? { ...movie, [voteType]: movie[voteType] + 1 } : movie
-      )
-    );
+  const handleVote = async (id, type) => {
+    try {
+      if (type === "like") {
+        await likeMovie(id);
+        setMovies((prev) =>
+          prev.map((movie) =>
+            movie.id === id ? { ...movie, likes: movie.likes + 1 } : movie
+          )
+        );
+      } else if (type === "dislike") {
+        await dislikeMovie(id);
+        setMovies((prev) =>
+          prev.map((movie) =>
+            movie.id === id ? { ...movie, dislikes: movie.dislikes + 1 } : movie
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Greska pri glasanju", error);
+    }
   };
 
   useEffect(() => {
@@ -98,8 +116,8 @@ const MovieList = () => {
             <Movie
               key={movie.id}
               movie={movie}
-              onLike={() => handleVote(movie.id, "likes")}
-              onDislike={() => handleVote(movie.id, "dislikes")}
+              onLike={() => handleVote(movie.id, "like")}
+              onDislike={() => handleVote(movie.id, "dislike")}
               editLink={`/movies/edit/${movie.id}`}
               onDelete={() => handleDelete(movie.id)}
             />
