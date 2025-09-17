@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Movie from "./Movie";
+import Spinner from "./Spinner.jsx";
 import { getAllMovies } from "../services/movieService.js";
 import { Link } from "react-router-dom";
 
@@ -7,6 +8,7 @@ const MovieList = () => {
   const [movies, setMovies] = useState([]);
   const [bestRatedMovie, setBestRatedMovie] = useState(null);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const danasnjiDan = new Date().toLocaleDateString("sr-RS");
 
@@ -26,6 +28,8 @@ const MovieList = () => {
       setError("");
     } catch (err) {
       setError("Greska pri učitavanju filmova");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -45,6 +49,13 @@ const MovieList = () => {
     const bestMovie = getBestRatedMovie(movies);
     setBestRatedMovie(bestMovie);
   }, [movies]);
+
+  if (loading)
+    return (
+      <div className="spinner-wrapper">
+        <Spinner />
+      </div>
+    );
 
   return (
     <div>
