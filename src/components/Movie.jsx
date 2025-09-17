@@ -1,6 +1,7 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
-const Movie = ({ movie, onLike, onDislike, onEdit }) => {
+const Movie = ({ movie, onLike, onDislike, editLink }) => {
   return (
     <li className="movie-item">
       <div className="movie-container">
@@ -12,9 +13,11 @@ const Movie = ({ movie, onLike, onDislike, onEdit }) => {
           <p>Cena: {movie.price} RSD</p>
 
           <div className="movie-btn-container">
-            <button onClick={onLike}>Like({movie.likes})</button>
-            <button onClick={onDislike}>Dislike({movie.dislikes})</button>
-            <button onClick={onEdit}>Edit</button>
+            <button onClick={onLike}>Like ({movie.likes})</button>
+            <button onClick={onDislike}>Dislike ({movie.dislikes})</button>
+            <Link to={editLink} className="edit-btn">
+              Edit
+            </Link>
           </div>
         </div>
       </div>

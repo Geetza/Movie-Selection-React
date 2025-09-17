@@ -1,16 +1,3 @@
-.movieForm-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 100;
-}
-
 .movieForm-container {
   background-color: var(--dark-gray);
   padding: 30px;
@@ -18,6 +5,7 @@
   width: 350px;
   display: flex;
   flex-direction: column;
+  margin: 40px auto; // centrirana na ekranu, ali standardno u flow-u
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
   transition: transform 0.3s ease;
 

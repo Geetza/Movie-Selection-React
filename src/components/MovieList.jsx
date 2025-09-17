@@ -1,16 +1,10 @@
 import React, { useEffect, useState } from "react";
 import Movie from "./Movie";
-import MovieForm from "./MovieForm";
-import {
-  getAllMovies,
-  createMovie,
-  updateMovie,
-} from "../services/movieService.js";
+import { getAllMovies } from "../services/movieService.js";
+import { Link } from "react-router-dom";
 
 const MovieList = () => {
   const [movies, setMovies] = useState([]);
-  const [editingMovie, setEditingMovie] = useState(null);
-  const [showMovieForm, setShowMovieForm] = useState(false);
   const [bestRatedMovie, setBestRatedMovie] = useState(null);
   const [error, setError] = useState("");
 
@@ -43,38 +37,7 @@ const MovieList = () => {
     );
   };
 
-  const handleAddMovie = async (newMovie) => {
-    try {
-      const savedMovie = await createMovie(newMovie);
-      setMovies((prevMovies) => [...prevMovies, savedMovie]);
-      setShowMovieForm(false);
-    } catch (err) {
-      setError("Greska pri dodavanju filma");
-    }
-  };
-
-  const handleEditMovie = (movie) => {
-    if (editingMovie && editingMovie.id === movie.id) {
-      setEditingMovie(null);
-    } else {
-      setEditingMovie(movie);
-    }
-  };
-
-  const handleUpdateMovie = async (movieToUpdate) => {
-    try {
-      const savedMovie = await updateMovie(movieToUpdate);
-      setMovies((prevMovies) =>
-        prevMovies.map((m) => (m.id === savedMovie.id ? savedMovie : m))
-      );
-      setEditingMovie(null);
-    } catch {
-      setError("Greska pri izmeni filma");
-    }
-  };
-
   useEffect(() => {
-    console.log("Postavka filmova");
     loadMovies();
   }, []);
 
@@ -83,41 +46,12 @@ const MovieList = () => {
     setBestRatedMovie(bestMovie);
   }, [movies]);
 
-  useEffect(() => {
-    return () => {
-      console.log("Sklanjanje filmova");
-    };
-  }, []);
-
   return (
     <div>
       <div className="movieList-header">
         <h1 className="movieList-title">Repertoar za danas ({danasnjiDan})</h1>
-
         {error && <p style={{ color: "red" }}>{error}</p>}
-
-        <button
-          className="add-movie-btn"
-          onClick={() => setShowMovieForm(true)}
-        >
-          Dodaj film
-        </button>
       </div>
-
-      {showMovieForm && (
-        <MovieForm
-          onAddMovie={handleAddMovie}
-          onCancel={() => setShowMovieForm(false)}
-        />
-      )}
-
-      {editingMovie && (
-        <MovieForm
-          onUpdateMovie={handleUpdateMovie}
-          defaultValues={editingMovie}
-          onCancel={() => setEditingMovie(null)}
-        />
-      )}
 
       {bestRatedMovie && (
         <div className="best-movie">
@@ -146,8 +80,7 @@ const MovieList = () => {
               movie={movie}
               onLike={() => handleVote(movie.id, "likes")}
               onDislike={() => handleVote(movie.id, "dislikes")}
-              onEdit={() => handleEditMovie(movie)}
-              isEditing={editingMovie && editingMovie.id === movie.id}
+              editLink={`/movies/edit/${movie.id}`}
             />
           ))}
         </ul>

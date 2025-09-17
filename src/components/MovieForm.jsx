@@ -1,71 +1,87 @@
-import React, { useState } from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
 import { useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import {
+  createMovie,
+  getOneMovie,
+  updateMovie,
+} from "../services/movieService";
 
-const MovieForm = ({ onAddMovie, onUpdateMovie, defaultValues, onCancel }) => {
+const MovieForm = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm({ defaultValues });
+  } = useForm({
+    defaultValues: {
+      name: "",
+      hall: "",
+      price: "",
+      poster: "",
+      likes: Math.floor(Math.random() * 5) + 1,
+      dislikes: Math.floor(Math.random() * 5) + 1,
+    },
+  });
 
   useEffect(() => {
-    console.log("MovieForm mountovan");
-    if (!defaultValues) {
+    if (id) {
+      getOneMovie(id).then((movie) =>
+        reset({
+          name: movie.name,
+          hall: movie.hall,
+          price: movie.price,
+          poster: movie.poster,
+          likes: movie.likes,
+          dislikes: movie.dislikes,
+        })
+      );
+    } else {
       reset({
         name: "",
         hall: "",
         price: "",
         poster: "",
-        likes: Math.floor(Math.random() * 5) + 1,
-        dislikes: Math.floor(Math.random() * 5) + 1,
+        likes: 0,
+        dislikes: 0,
       });
-    } else {
-      reset(defaultValues);
     }
+  }, [id, reset]);
 
-    return () => {
-      console.log("MovieForm unmountovan");
-    };
-  }, [defaultValues, reset]);
-
-  const onSubmit = (data) => {
-    const newMovie = {
-      id: defaultValues?.id,
-      name: data.name,
-      hall: Number(data.hall),
-      price: Number(data.price),
-      poster: data.poster,
-      likes: data.likes || 0,
-      dislikes: data.dislikes || 0,
-    };
-
-    if (defaultValues) {
-      onUpdateMovie(newMovie);
-    } else {
-      onAddMovie(newMovie);
+  const onSubmit = async (data) => {
+    try {
+      if (id) {
+        await updateMovie({ ...data, id: Number(id) });
+      } else {
+        await createMovie(data);
+      }
+      navigate("/movies");
+    } catch (err) {
+      console.error("Greska pri snimanju filma", err);
     }
-    reset();
   };
 
   return (
     <div className="movieForm-overlay">
       <div className="movieForm-container">
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <h2 className="form-title">Dodaj/Izmeni Film</h2>
+        <h2 className="form-title">{id ? "Izmeni film" : "Dodaj film"}</h2>
 
+        <form onSubmit={handleSubmit(onSubmit)}>
           <label>
-            Naziv:{" "}
+            Naziv:
             <input
               type="text"
-              {...register("name", { required: "Naziv filma morate uneti" })}
+              {...register("name", { required: "Naziv filma je obavezan" })}
             />
           </label>
           {errors.name && <span className="error">{errors.name.message}</span>}
 
           <label>
-            Sala:{" "}
+            Sala:
             <input
               type="number"
               {...register("hall", {
@@ -78,26 +94,28 @@ const MovieForm = ({ onAddMovie, onUpdateMovie, defaultValues, onCancel }) => {
           {errors.hall && <span className="error">{errors.hall.message}</span>}
 
           <label>
-            Slika: <input type="text" {...register("poster")} />
-          </label>
-
-          <label>
-            Cena:{" "}
+            Cena:
             <input
               type="number"
-              {...register("price", { required: "Cenu za film morate uneti" })}
+              {...register("price", {
+                required: "Cenu za film morate uneti",
+                min: { value: 1, message: "Cena ne moze biti manja od 1" },
+              })}
             />
           </label>
           {errors.price && (
             <span className="error">{errors.price.message}</span>
           )}
 
+          <label>
+            Poster:
+            <input type="text" {...register("poster")} />
+          </label>
+
           <div className="submit-btn-container">
-            <button type="submit" className="submit-btn">
-              Submit
-            </button>
-            <button type="button" className="cancel-btn" onClick={onCancel}>
-              Cancel
+            <button type="submit">{id ? "Sacuvaj" : "Dodaj"}</button>
+            <button type="button" onClick={() => navigate("/movies")}>
+              Otkazi
             </button>
           </div>
         </form>
